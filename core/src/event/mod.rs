@@ -9,8 +9,31 @@ pub mod handlers;
 
 #[derive(Clone, Debug)]
 pub enum Event {
-    BroadcasterLiveEvent(TwitchBroadcasterStatus),
-    BroadcasterOfflineEvent(TwitchBroadcasterStatus)
+    BroadcasterLiveEvent(Message<TwitchBroadcasterStatus>),
+    BroadcasterOfflineEvent(Message<TwitchBroadcasterStatus>),
+}
+
+#[derive(Clone, Debug)]
+pub struct Message<T : Clone> {
+    pub timestamp : u128,
+    pub message : T
+}
+
+impl<T : Clone> Message<T> {
+    pub fn get_message_ref(&self) -> &T {
+        &self.message
+    }
+
+    pub fn get_message(&self) -> T {
+        self.message.clone()
+    }
+
+    pub fn new(msg : T) -> Self {
+        Self {
+            message: msg,
+            timestamp: std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_millis()
+        }
+    }
 }
 
 impl Event {
@@ -94,6 +117,7 @@ impl Organiser {
             loop {
                 let resp = self.receiver.recv().await.unwrap();
                 let handlers = self.event_handler_registry.handlers.get(&resp.event_type().name()).unwrap();
+                println!("Event received: {}", resp.event_type().name());
                 for handler in handlers.to_vec() {
                     handler.run(resp.clone()).await;
                 }

@@ -11,7 +11,7 @@ impl BroadcasterLive {
 impl EventHandler for BroadcasterLive {
     async fn run(&self, event: Event) {
         if let Event::BroadcasterLiveEvent(data) = event {
-            println!("{}, {}", data.name, data.live);
+            println!("{}, {} at {}", data.message.name, data.message.live, data.timestamp);
         }
     }
 }
