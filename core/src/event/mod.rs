@@ -4,19 +4,26 @@ use tokio::runtime::Runtime;
 use tokio::sync::broadcast::{Sender, Receiver, channel};
 use crate::model::twitch::TwitchBroadcasterStatus;
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 
 pub mod handlers;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum Event {
     BroadcasterLiveEvent(Message<TwitchBroadcasterStatus>),
     BroadcasterOfflineEvent(Message<TwitchBroadcasterStatus>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Message<T : Clone> {
     pub timestamp : u128,
     pub message : T
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct EventEnvelope {
+    pub event_type : String,
+    pub payload : Event
 }
 
 impl<T : Clone> Message<T> {
